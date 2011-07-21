@@ -1,9 +1,21 @@
 #!/usr/bin/python
 #
 # bbab2csv - BlackBerry Address Book to CSV
-# by Brandon Mintern, bmintern@gmail.com
-# Copyright 2011
-# Licensed under the GPLv2
+# Copyright 2011 Brandon Mintern, bmintern@gmail.com
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 # Hosted on github
  
 usage = """
@@ -125,7 +137,9 @@ except (IndexError, IOError):
 
 contacts = []
 for contactfile in iterate_contacts(tarball):
-    # We'll store each field from the contact file in a dict
+    # We'll store each field from the contact file in a dict mapping field
+    # name to list of field values. It's important to store it as a list
+    # because the name field (for example) appears more than once
     contact = defaultdict(list)
     while True:
         field_type, field = read_bb_field(contactfile)
@@ -142,8 +156,10 @@ tarball.close()
 csvout = csv.writer(sys.stdout)
 csvout.writerow(field_names)
 
-# Iterate over the contacts in order by name
+# Iterate over the contacts in order by name. Note that x[name] will never
+# fail because x is a defaultdict(list)
 for contact in sorted(contacts, key=lambda x: x[name]):
-    # Write out the contact info for known fields to the CSV
+    # Write out the contact info for known fields to the CSV. Here we join the
+    # list items corresponding to each field
     csvout.writerow(map(lambda x: " ".join(contact[x]),
                         field_names))
